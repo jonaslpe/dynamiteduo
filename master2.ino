@@ -1,4 +1,5 @@
 #include <FastLED.h>
+#define ENCODER_OPTIMIZE_INTERRUPTS
 #include <Encoder.h>
 #include <Adafruit_NeoPixel.h>
 #include <TimerOne.h>
@@ -257,8 +258,9 @@ void loop() {
     long newPosition = myEncoder.read();
     if (newPosition != oldPosition) {
       oldPosition = newPosition;
-      encoderValue = myEncoder.read();
-      encoderValue = constrain(encoderValue, minValue, maxValue);
+      if (newPosition < minValue){myEncoder.write(minValue);}
+      if (newPosition > maxValue){myEncoder.write(maxValue);}
+      encoderValue = constrain(newPosition, minValue, maxValue);
       
       knappLEDs(encoderValue);
       Serial.println(encoderValue);
@@ -324,7 +326,7 @@ void loop() {
             }
 
             Timer1.initialize(50000);          // Sett opp timer til å avbryte hver 50 millisekunder
-            //Timer1.attachInterrupt(timerIsr);  // Koble til interrupt-rutinen
+            Timer1.attachInterrupt(timerIsr);  // Koble til interrupt-rutinen
       }
       
         }
